@@ -1,0 +1,80 @@
+{% extends 'base_temp/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans 'Product detail' %}{% endblock %}
+
+{% block extrahead %}
+    <script src={% static 'product_st/product_detail.js' %}></script>
+{% endblock %}
+
+{% block onload %}"OnloadProductDetail()"{% endblock %}
+{% block section1 %}
+    <center>
+        <div style="display: none" id="jsonData-id" data-json="{{ product.id }}"></div>
+        <div style="display: none" id="jsonData-name" data-json="{{ product.name }}"></div>
+        <div style="display: none" id="jsonData-price" data-json="{{ product.price }}"></div>
+        <div style="display: none" id="jsonData-final-price" data-json="{{ product.final_price }}"></div>
+        <div style="display: none" id="jsonData-image" data-json="{{ product.image.url }}"></div>
+        <div style="display: none" id="jsonData-leftovers" data-json="{{ product.leftovers }}"></div>
+
+        <div class="row">
+            <div class="col">
+                <img src="{{ product.image.url }}" alt="{{ product.name }} {{ product.color }}"
+                     style="height: 450px; width: 350px; border-radius: 8px; margin: 5px auto">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col" style="margin: 10px">
+                <div class="col-1">
+
+                    <form id="form" method="post">{% csrf_token %}
+                        {% if product.leftovers %}
+                            {#                            <div style="display: none" id="jsonData-id" data-json="{{ product.id }}"></div>#}
+                            <input type="hidden" name="products" value={{ product.id }}>
+                            <button style="color: #26d63b" type="button" id="addToCartBtn"><i
+                                    class="fa fa-shopping-basket"></i>
+                            </button>
+                        {% else %}
+                            <p>{% trans 'Lack of inventory' %}</p>
+                        {% endif %}
+                        <br>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row" style="">
+            <div class="col-12 ">
+                <h3>{% trans 'Product Name:' %} {{ product.name }}</h3>
+                {% if product.discount %}
+                    <p style="color: red; text-decoration: line-through; font-size: 15px">{% trans 'Product Price:' %} {{ product.price }}000</p>
+                    <p>{% trans 'Product Discounted Price:' %} {{ product.final_price }}</p>
+                {% else %}
+                    <p>{% trans 'Product Price:' %} {{ product.final_price }}</p>
+                {% endif %}
+                {% if product.leftovers < 5 %}
+                    <p style="color: red;">{% trans 'Leftovers:' %} {{ product.leftovers }}</p>
+                {% endif %}
+            </div>
+
+<!--            <div class="col-12 col-md-6">-->
+<!--                <p>{% trans 'Product Color:' %} {{ product.color }}</p>-->
+<!--                <p>{% trans 'Product Size:' %} {{ product.size }}</p>-->
+<!--                <p>{% trans 'Product Brand:' %} {{ product.brand }}</p>-->
+
+<!--            </div>-->
+
+        </div>
+        {% if product.description %}
+            <div class="row">
+                <div class="col">
+                    <h3>{% trans 'Description' %}</h3>
+                    <p>{{ product.description }}</p>
+                </div>
+            </div>
+        {% endif %}
+    </center>
+{% endblock %}
+

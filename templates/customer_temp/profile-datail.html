@@ -1,0 +1,33 @@
+{% extends 'customer_temp/base_dashboard.html' %}
+{% load i18n static %}
+
+
+{% block dashboard %}
+    <div class="row">
+
+        <div class="col-12 information main-info active" style="margin: 15px">
+            <center>
+                <h2 style="margin: 20px">{% trans 'Personal Profile' %}</h2>
+                <table style="border: 1px solid black; padding: 10px; text-align: center;">
+                    {#                <h4 style="margin: 20px">{% trans 'Email:' %} {{ user.email }}</h4>#}
+                    {#                {% if user.first_name %}<p>{% trans 'First Name:' %} {{ user.first_name }}</p>{% endif %}#}
+                    {#                {% if user.last_name %}<p>{% trans 'Last Name:' %} {{ user.last_name }}</p>{% endif %}#}
+                    {#                <p>{{ user.address_set }}</p>#}
+                    <tr>
+                        <th style="border: 1px solid black; padding: 10px; text-align: center; background-color: rgba(35,194,54,0.67)">{% trans 'First Name' %}</th>
+                        <th style="border: 1px solid black; padding: 10px; text-align: center; background-color: rgba(35,194,54,0.67)">{% trans 'Last Name' %}</th>
+                        <th style="border: 1px solid black; padding: 10px; text-align: center; background-color: rgba(35,194,54,0.67)">{% trans 'Email' %}</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid black; padding: 10px; text-align: center;">{{ user.first_name }}</td>
+                        <td style="border: 1px solid black; padding: 10px; text-align: center;">{{ user.last_name }}</td>
+                        <td style="border: 1px solid black; padding: 10px; text-align: center;">{{ user.email }}</td>
+                    </tr>
+                </table>
+            </center>
+        </div>
+
+
+    </div>
+{% endblock %}
+
