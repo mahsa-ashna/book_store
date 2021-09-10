@@ -1,110 +1,124 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F
-from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render
 
 # Create your views here.
-from django.template.loader import render_to_string
-from django.urls import reverse, reverse_lazy
-from django.views import View, generic
-from django.views.decorators.http import require_POST
-# from order.cart import Cart
-# from order.forms import CartAddProductForm
-from rest_framework import generics
+from django.views import generic
 
-from order.models import Order, OrderItem
+from products.models import Product
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.views import generic
+# Create your views here.
+from rest_framework import generics
+from django.utils.translation import gettext_lazy as _
+
 from products.models import Product
 
 
-class CartList(LoginRequiredMixin, View):
-
-    def get(self, request, *args, **kwargs):
-        # user = User.objects.get(id=request.user.id)
-        user = request.user
-        if user.address_set.count() == 0:
-            return redirect(reverse_lazy('customer:address_create'))
-        # items = list(request.COOKIES.get('cart', '').split('-')[:-1])
-        items = set(request.COOKIES.get('cart', '').split('-')[:-1])
-        order = user.order_set.filter(status__exact='Pr')
-        # print(order)
-        if order:
-            if order.count() == 1:
-                # order = order
-                order = order.first()
-                # print('order: ', order, 'items: ', items)
-                for item in items:
-                    product = Product.objects.get(id=int(item))
-                    if not order.orders.filter(product=product):
-                        OrderItem.objects.create(order=order, product=product)
+class Landing(generic.TemplateView):
+    template_name = 'landing_temp/landing.html'
+    extra_context = {
+        'products': Product.objects.all()
+    }
 
 
 
-        else:
-            new_order = Order.objects.create(user=user)
-            order = new_order
-            # print('new order: ', order, 'items: ', items)
-            for item in items:
-                product = Product.objects.get(id=int(item))
-                OrderItem.objects.create(order=order, product=product)
 
-        cart_items = order.orders.all()
-        # print(cart_items.count())
-        resp = render(request, 'order_temp/detail.html', {
-            'order': order,
-            'cart_items': cart_items,
-            'n': list(range(cart_items.count()))
-        })
-        resp.set_cookie('cart', '')
+class ProductDetail(generic.DetailView):
+    template_name = 'product_temp/product_detail_view.html'
+    model = Product
+    context_object_name = 'product'
+
+    def post(self, request, *args, **kwargs):
+        resp = JsonResponse({'x': 'y'})
+        cart = request.COOKIES.get('cart', '')
+        resp.set_cookie('cart', cart + request.POST['products'] + '-')
         return resp
 
-# Plus product qty
-def plus_product_qty(request, o_i_id):
-    # dictionary for initial data with
-    # field names as keys
-    context = {}
 
-    if request.method == 'GET':
-        return reverse_lazy('order:cart_list')
-
-    # fetch the object related to passed id
-    obj = get_object_or_404(OrderItem, id=o_i_id)
-
-    if request.method == "POST":
-        # add object
-        if obj.number < obj.product.leftovers:
-            obj.number = F('number') + 1
-            obj.save()
-        return HttpResponseRedirect(reverse_lazy('order:cart_list'))
-
-        return render(request, "order_temp/detail.html", context)
+class ProductCardView(generic.DetailView):
+    template_name = 'product_temp/product_card_view.html'
+    model = Product
+    context_object_name = 'product'
 
 
-
-# Minus product qty
-def minus_product_qty(request, o_i_id):
-    # dictionary for initial data with
-    # field names as keys
-    context = {}
-
-    if request.method == 'GET':
-        return reverse_lazy('order:cart_list')
-
-    # fetch the object related to passed id
-    obj = get_object_or_404(OrderItem, id=o_i_id)
-
-    if request.method == "POST":
-        # add object
-        if obj.number > 1:
-            obj.number = F('number') - 1
-            obj.save()
-        return HttpResponseRedirect(reverse_lazy('order:cart_list'))
-
-        return render(request, "order_temp/detail.html", context)
+class ProductIndexView(generic.TemplateView):
+    template_name = 'product_temp/product_index.html'
+    extra_context = {
+        'products': Product.objects.all()
+    }
 
 
-# Delete from cart
-class DeleteCartItem(LoginRequiredMixin, generic.DeleteView):
-    model = OrderItem
-    success_url = reverse_lazy('order:cart_list')
+class ProductScientificView(generic.TemplateView):
+    template_name = 'product_temp/product_index_scientific.html'
+    extra_context = {
+        'products': Product.objects.filter(category__name='scientific')
+    }
+
+
+class ProductHistoricalView(generic.TemplateView):
+    template_name = 'product_temp/product_index_historical.html'
+    extra_context = {
+        'products': Product.objects.filter(category__name='historical')
+    }
+
+
+class ProductArtisticView(generic.TemplateView):
+    template_name = 'product_temp/product_index_artistic.html'
+    extra_context = {
+        'products': Product.objects.filter(category__name='artistic')
+    }
+
+def scookie(request):
+    response = HttpResponse('cookie')
+    response.set_cookie('x', 'y')
+    return response
+
+
+def gcookie(request):
+    my_y = request.COOKIES['x']
+    return HttpResponse('this is my y: ' + my_y)
+
+
+def addcookie(request):
+    resp = HttpResponse('successfully added to cart')
+    cart = request.COOKIES.get('cart', '')
+    resp.set_cookie('cart', cart + 'zzz')
+    # resp.set_cookie('cart', cart + request.POST['zzz'] + ',')
+    return resp
+
+
+def test_cookie(request):
+    if not request.COOKIES.get('cart'):
+        response = HttpResponse("Visiting for the first time.")
+        response.set_cookie('cart', '2,3,4,')
+        return response
+    else:
+        return HttpResponse(f"Your favorite cart is {request.COOKIES['cart']}")
+
+
+
+
+class SearchView(generic.ListView):
+    model = Product
+    template_name = 'product_temp/search.html'
+    context_object_name = 'search_results'
+
+    def get_queryset(self):
+        result = super(SearchView, self).get_queryset()
+        query = self.request.GET.get('search')
+        if query:
+            res = Product.objects.filter(name__contains=query)
+            result = res
+        else:
+            result = None
+        return result
+
+
+
+
+
+
+
+
 
 

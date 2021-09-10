@@ -1,13 +1,24 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 
-from order.views import *
+from products.views import *
 
-app_name = 'order'
+app_name = 'product'
 urlpatterns = [
-    path('cart_list', CartList.as_view(), name='cart_list'),
-    path('cart_delete/<int:pk>', DeleteCartItem.as_view(), name='cart_delete'),
-    path('plus_product_qty/<o_i_id>', plus_product_qty, name='plus_product_qty'),
-    path('minus_product_qty/<o_i_id>', minus_product_qty, name='minus_product_qty'),
+    # Template Views
+    path('', ProductIndexView.as_view(), name='product_index_view'),
+    path('Scientific/', ProductScientificView.as_view(), name='Scientific'),
+    path('Historical/', ProductHistoricalView.as_view(), name='Historical'),
+    path('Artistic/', ProductArtisticView.as_view(), name='Artistic'),
+    path('product_card_view/<int:pk>', ProductCardView.as_view(), name='product_card_view'),
+    path('product_detail/<int:pk>', ProductDetail.as_view(), name='product_detail'),
+    path('search_result/', SearchView.as_view(), name='search_result'),
 
 
-]
+    path('scookie', scookie),
+    path('gcookie', gcookie),
+    path('test_cookie', test_cookie),
+    path('addcookie', addcookie),
+
+   ]
