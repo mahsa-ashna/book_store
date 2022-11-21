@@ -1,2 +1,2 @@
-# book_store_ashna
+# book_store
 python-django project
